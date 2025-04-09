@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block header %}
+    {% endblock %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+<div id="header">
+        <a href="{% url 'mysite' %}" class="link">
+            <img src="{% static 'media/icon/logo.png' %}" alt="Mysite Logo" class="icon">
+            <p class="link-text">O-TR</p>
+        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'view_profile' user.username %}" class="link">
+                <img src="{% static 'media/icon/account.png' %}" alt="Profile Image" class="icon">
+                <p class="link-text">My Profile</p>
+            </a>
+            <a href="{% url 'main' %}" class="link">
+                <img src="{% static 'media/icon/main.png' %}" alt="Main Page Image" class="icon">
+                <p class="link-text">Main Page</p>
+            </a>
+            <a href="{% url 'logout' %}" class="link">
+                <img src="{% static 'media/icon/logout.png' %}" alt="Logout Image" class="icon">
+                <p class="link-text">Logout</p>
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}" class="link">
+                <img src="{% static 'media/icon/login.png' %}" alt="Login Image" class="icon">
+                <p class="link-text">Login</p>
+            </a>
+        {% endif %}
+        <a href="https://vk.com/vladiclav4ik" class="author">
+            <p class="link-text">@Vladiclav4ik</p>
+        </a>
+</div>
+<div id="content">
+    {% block content %}
+
+    {% endblock %}
+</div>
+</body>
+</html>

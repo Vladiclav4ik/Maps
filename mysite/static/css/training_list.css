@@ -1,0 +1,40 @@
+/* training_list.css */
+
+/* Style for the title */
+h2 {
+    color: #333;
+    text-align: center; /* Центрирование заголовка */
+    margin-bottom: 20px;
+}
+
+/* Style for the list container */
+ul {
+    width: 800px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0 auto; /* Центрирует элемент по горизонтали */
+}
+
+/* Style for each training item */
+li {
+    background-color: orange;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Style for training name */
+li strong {
+    color: #fff;
+    text-align: center; /* Выравнивание текста по центру */
+    display: inline-block;
+    margin-bottom: 5px;
+    width: 100px;
+}
+
+/* Style for links */
+a {
+    text-align: center;
+    color: blue;
+    text-decoration: underline;
+}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/add_training.css' %}">
+{% endblock %}
+
+{% block title %}
+Add Training
+{% endblock %}
+
+{% block content %}
+<h2 class="title">Add Training</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.name.errors }}
+    <label for="{{ form.name.id_for_label }}">Name:</label>
+    {{ form.name }}
+
+    {{ form.activity_type.errors }}
+    <label for="{{ form.activity_type.id_for_label }}">Activity Type:</label>
+    {{ form.activity_type }}
+
+    {{ form.route.errors }}
+    <label for="{{ form.route.id_for_label }}">File gpx:</label>
+    {{ form.route }}
+
+    {{ form.distance.errors }}
+    <label for="{{ form.distance.id_for_label }}">Distance (km):</label>
+    {{ form.distance }}
+
+    <label for="{{ form.hours.id_for_label }}">Hours:</label>
+    {{ form.hours }}
+    <label for="{{ form.minutes.id_for_label }}">Minutes:</label>
+    {{ form.minutes }}
+    <label for="{{ form.seconds.id_for_label }}">Seconds:</label>
+    {{ form.seconds }}
+
+    {{ form.rating.errors }}
+    <label for="{{ form.rating.id_for_label }}">Rating:</label>
+    {{ form.rating }}
+
+    <button type="submit">Save Training</button>
+</form>
+{% endblock %}

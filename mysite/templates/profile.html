@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block title %}
+Profile of {{ user.username }}
+{% endblock %}
+
+{% block content %}
+    <h2>Profile of {{ user.username }}</h2>
+    <ul>
+        <h3>Statistic</h3>
+        <div class="static">
+            <h4>Total distance</h4>
+            <h5>{{ avg_dist }}</h5>
+        </div>
+        <div class="static">
+            <h4>Total time</h4>
+            <h5>{{ avg_time }}</h5>
+        </div>
+        <div class="static">
+            <h4>Total rating</h4>
+            <h5>{{ avg_rating }}</h5>
+        </div>
+    </ul>
+    <ul>
+        <h3>User trainings (last 3)</h3>
+         {% for training in trainings %}
+            <li>
+                <strong><a href="{% url 'training_detail' training.pk %}">{{ training.name }}</a></strong><br>
+                <strong>Activity Type:</strong> {{ training.get_activity_type_display }}<br>
+                <strong>Distance:</strong> {{ training.distance }} km<br>
+                <strong>Time:</strong> {{ training.time }}<br>
+                <strong>Route:</strong>
+                {% if training.route %}
+                    <a href="{{ training.route.url }}">{{ training.route.name }}</a>
+                {% else %}
+                    No GPX
+                {% endif %}
+                <br>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
