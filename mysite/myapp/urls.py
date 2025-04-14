@@ -16,7 +16,9 @@ urlpatterns = [
     path('training/<int:pk>/', views.training_detail, name='training_detail'),
     path('mysite/', views.mysite, name='mysite'),
     path('training/<int:training_id>/pdf/', views.generate_pdf, name='training_pdf'),
-    path('maps/', views.maps, name='maps')
+    path('maps/', views.map_view, name='map_view'),
+    path('map/<int:map_id>/', views.map_detail, name='map_detail'),
+    path('upload/', views.upload_map, name='upload_map')
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

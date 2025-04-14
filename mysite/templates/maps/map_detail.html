@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ map.title }}</title>
+  <style>
+    img.map-image {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h2>{{ map.title }}</h2>
+
+  <img src="{{ map.image.url }}" alt="Карта {{ map.title }}" class="map-image">
+
+  <br>
+  <a href="{{ map.image.url }}" download>Скачать карту</a>
+  <br>
+  <a href="{% url 'upload_map' %}">Загрузить новую карту</a>
+</body>
+</html>

@@ -1,25 +1,66 @@
+from urllib import request
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import LoginForm
 from .forms import UserRegistrationForm
 from django.contrib.auth.models import User
-from .models import Training
+from .models import Training, MapImage
 from .forms import TrainingForm
 from datetime import timedelta
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from .forms import MapImageForm
+from django.http import JsonResponse
+from django.core.files.base import ContentFile
+from .models import MapImage
+import base64
 from io import BytesIO
+from django.core.files.storage import default_storage
+import json
+from django.shortcuts import render, redirect
+
 @login_required
 def training_detail(request, pk):
     training = get_object_or_404(Training, pk=pk)
     return render(request, 'training_detail.html', {'training': training})
 
 @login_required
-def maps(request):
-    
-    return render(request, 'training_detail.html', {'training': training})
+def map_view(request):
+    user = User.objects.get(username=request.user.username)
+    maps = MapImage.objects.filter(author=user)
+    return render(request, 'maps/map_view.html', {'maps': maps})
+
+@login_required
+def upload_map(request):
+    if request.method == 'POST':
+        form = MapImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            map_image = form.save(commit=False)
+            map_image.nw_lat = request.POST.get('nw_lat')
+            map_image.nw_lng = request.POST.get('nw_lng')
+            map_image.ne_lat = request.POST.get('ne_lat')
+            map_image.ne_lng = request.POST.get('ne_lng')
+            map_image.sw_lat = request.POST.get('sw_lat')
+            map_image.sw_lng = request.POST.get('sw_lng')
+            map_image.author = request.user
+            map_image.save()
+            return redirect(map_view)
+    else:
+        form = MapImageForm()
+    return render(request, 'maps/upload_map.html', {'form': form})
+
+@login_required
+def map_detail(request, map_id):
+    # Получаем карту по id
+    map_instance = get_object_or_404(MapImage, pk=map_id)
+
+    return render(request, 'maps/map_detail.html', {'map': map_instance})
+
 
 @login_required
 def add_training(request):

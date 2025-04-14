@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Все карты</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 90vh; width: 100%; }
+  </style>
+</head>
+<body>
+  <h2>Карты на подложке</h2>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  {% load static %}
+  <script src="{% static 'js/leaflet.js' %}"></script>
+
+  <script>
+    var map = L.map('map').setView([59.93, 30.31], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    {% for m in maps %}
+      {% if m.image %}
+        (function() {
+          var topleft = [{{ m.nw_lat }}, {{ m.nw_lng }}];
+          var topright = [{{ m.ne_lat }}, {{ m.ne_lng }}];
+          var bottomleft = [{{ m.sw_lat }}, {{ m.sw_lng }}];
+
+          var overlay = new L.ImageOverlay.Rotated(
+            "{{ m.image.url }}",
+            topleft,
+            topright,
+            bottomleft,
+            {
+              opacity: 1,
+              interactive: true
+            }
+          ).addTo(map);
+
+          overlay.on('click', function(e) {
+            L.popup()
+              .setLatLng(e.latlng)
+              .setContent('<strong>{{ m.title }}</strong><br><a href="{% url "map_detail" map_id=m.id %}">Перейти к карте</a>')
+              .openOn(map);
+          });
+        })();
+      {% endif %}
+    {% endfor %}
+  </script>
+
+  <a href="{% url 'upload_map' %}">Загрузить новую карту</a>
+</body>
+</html>
