@@ -1,51 +1,127 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Main Menu</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-{% block header %}
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/main.css' %}">
-{% endblock %}
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
 
-{% block title %}
-Profile
-{% endblock %}
+      header {
+        padding: 20px 0;
+        text-align: center;
+      }
 
-{% block content %}
-<h2>Welcome to Main, {{ user.username }}</h2>
-<ul>
-    <h3>Statistic</h3>
-    <div class="static">
-        <h4>Total distance</h4>
-        <h5>{{ avg_dist }}</h5>
+      header h2 {
+        margin: 0;
+        font-size: 36px;
+        color: #007BFF;
+        font-weight: 600;
+      }
+
+      .container {
+        flex: 1;
+        max-width: 600px;
+        max-height: 400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 30px;
+      }
+
+      .user-link {
+        color: #007BFF;
+        text-decoration: none;
+      }
+
+      .user-link:hover {
+        text-decoration: underline;
+      }
+
+      .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 400px;
+        margin-bottom: 40px;
+      }
+
+      .menu-button {
+        padding: 14px;
+        background-color: #007BFF;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: background 0.3s ease;
+      }
+
+      .menu-button:hover {
+        background-color: #0056b3;
+      }
+
+      .logout-link {
+        color: #666;
+        text-decoration: none;
+        margin-top: auto;
+      }
+
+      .logout-link:hover {
+        text-decoration: underline;
+      }
+
+      footer {
+        text-align: center;
+        padding: 15px 0;
+        font-size: 14px;
+      }
+
+      footer a {
+        color: #007BFF;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+    </style>
+</head>
+<body>
+    <header>
+      <h2>Mysite — хранилище карт</h2>
+    </header>
+
+    <div class="container">
+        <h1>Привет, <a href="{% url 'view_profile' user.username %}" class="user-link">{{ public_name }}</a>!</h1>
+        <div class="button-group">
+            <a href="{% url 'upload_map' %}" class="menu-button">Загрузка карты</a>
+            <a href="{% url 'map_view' %}" class="menu-button">Мои карты</a>
+            <a href="{% url 'all_maps' %}" class="menu-button">Все публичные карты</a>
+        </div>
+        <a href="{% url 'logout' %}" class="logout-link">Выйти из аккаунта</a>
     </div>
-    <div class="static">
-        <h4>Total time</h4>
-        <h5>{{ avg_time }}</h5>
-    </div>
-    <div class="static">
-        <h4>Total rating</h4>
-        <h5>{{ avg_rating }}</h5>
-    </div>
-</ul>
-    <ul>
-        <h3>Last training</h3>
-         {% for training in trainings %}
-            <li>
-                <strong><a href="{% url 'training_detail' training.pk %}">{{ training.name }}</a></strong><br>
-                <strong>Activity Type:</strong> {{ training.get_activity_type_display }}<br>
-                <strong>Distance:</strong> {{ training.distance }} km<br>
-                <strong>Time:</strong> {{ training.time }}<br>
-                <strong>Route:</strong>
-                {% if training.route %}
-                    <a href="{{ training.route.url }}">{{ training.route.name }}</a>
-                {% else %}
-                    No GPX
-                {% endif %}
-                <br>
-            </li>
-        {% endfor %}
-    </ul>
-<div class="button-wrapper">
-    <button onclick="window.location='{% url 'add_training' %}'">Добавить тренировку</button>
-    <button onclick="window.location='{% url 'training_list' %}'">Все тренировки</button>
-</div>
-{% endblock %}
+
+    <footer>
+      Разработчик: <a href="https://t.me/vladick_love" target="_blank">@vladick_love</a>
+    </footer>
+</body>
+</html>

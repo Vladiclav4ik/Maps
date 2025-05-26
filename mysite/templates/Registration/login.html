@@ -1,21 +1,21 @@
-{% extends "base.html" %}
-
-{% block header %}
-{% load static %}
-<link rel="stylesheet" href="{% static 'css/login.css' %}">
-{% endblock %}
-
-{% block title %}Log-in{% endblock %}
-
-{% block content %}
-<div class="container">
-    <h1>Log-in</h1>
-    <p>Please, use the following form to log-in:</p>
-    <form action="." method="post">
-        {{ form.as_p }}
-        {% csrf_token %}
-        <p><input type="submit" value="Log-in"></p>
-    </form>
-    <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>  <!-- Кнопка для перехода в регистрацию -->
-</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Логин</title>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Логин</h1>
+        <p>Пожалуйста заполните форму для авторизации:</p>
+        <form action="." method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p><input type="submit" value="Логин"></p>
+        </form>
+        <p>У вас нет аккаунта? <a href="{% url 'register' %}">Регистрация</a></p>
+    </div>
+</body>
+</html>

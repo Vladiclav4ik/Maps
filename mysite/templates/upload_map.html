@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <title>Загрузка карты</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      padding: 30px 0 10px;
+      color: #222;
+      margin: 0;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+      gap: 30px;
+      overflow: hidden;
+    }
+
+    .map-container {
+      display: flex;
+      gap: 30px;
+      flex-grow: 1;
+      min-height: 0;
+    }
+
+    .map-wrapper {
+      flex: 2;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #ddd;
+      overflow: hidden;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      border-radius: 12px;
+    }
+
+    .sidebar {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    form input[type="file"],
+    form input[type="text"],
+    form button {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .footer-buttons {
+      text-align: center;
+      padding: 20px;
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
+
+    .footer-buttons a {
+      padding: 12px 24px;
+      background: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: background 0.2s ease;
+    }
+
+    .footer-buttons a:hover {
+      background: #0056b3;
+    }
+
+    .handle {
+      width: 14px;
+      height: 14px;
+      background-color: red;
+      border: 2px solid white;
+      border-radius: 50%;
+    }
+
+    /* Общие стили для полей ввода */
+.custom-input,
+.custom-textarea,
+.custom-select {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #bbb;
+  border-radius: 10px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  color: #333;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+/* Фокус на полях */
+.custom-input:focus,
+.custom-textarea:focus,
+.custom-select:focus {
+  border-color: #007BFF;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  outline: none;
+}
+
+/* Текстовое поле описание с фиксированной высотой и отключенным ресайзом */
+.custom-textarea {
+  min-height: 120px;
+  max-height: 120px;
+  resize: none;
+  line-height: 1.4;
+  color: #444;
+}
+
+/* Стилизация выпадающего списка (select) с кастомной стрелкой */
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3csvg fill='gray' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px 16px;
+  cursor: pointer;
+  padding-right: 44px; /* чтобы стрелка не перекрывала текст */
+}
+
+form button {
+  width: auto;             /* ширина по содержимому */
+  max-width: 240px;        /* ограничение ширины */
+  display: block;          /* чтобы margin-auto сработал */
+  margin: auto;            /* по вертикали и горизонтали центр */
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+form button:hover {
+  background-color: #0056b3;
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗺️ Загрузите карту и укажите её положение</h1>
+
+    <div class="map-container">
+      <div class="map-wrapper">
+        <div id="map"></div>
+      </div>
+
+      <div class="sidebar">
+        <form method="post" enctype="multipart/form-data" id="mapForm">
+          {% csrf_token %}
+          {{ form.as_p }}
+
+
+          <input type="hidden" name="nw_lat" id="nw_lat">
+          <input type="hidden" name="nw_lng" id="nw_lng">
+          <input type="hidden" name="ne_lat" id="ne_lat">
+          <input type="hidden" name="ne_lng" id="ne_lng">
+          <input type="hidden" name="sw_lat" id="sw_lat">
+          <input type="hidden" name="sw_lng" id="sw_lng">
+
+          <button type="submit">Сохранить карту</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-buttons">
+    <a href="{% url 'main' %}">← Назад</a>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="{% static 'js/leaflet.js' %}"></script>
+  <script>
+    let map = L.map('map').setView([59.93, 30.31], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    map.attributionControl.setPrefix('Mysite');
+
+    let imageUrl = null;
+    let imageOverlay = null;
+    let cornerMarkers = [];
+
+    function createOverlayFromCorners() {
+      if (!imageUrl || cornerMarkers.length !== 3) return;
+      if (imageOverlay) map.removeLayer(imageOverlay);
+      let nw = cornerMarkers[0].getLatLng();
+      let ne = cornerMarkers[1].getLatLng();
+      let sw = cornerMarkers[2].getLatLng();
+      imageOverlay = new L.ImageOverlay.Rotated(imageUrl, nw, ne, sw, { opacity: 0.7 }).addTo(map);
+    }
+
+    function createDraggableCorners(nw, ne, sw) {
+      cornerMarkers.forEach(m => map.removeLayer(m));
+      cornerMarkers = [];
+      [nw, ne, sw].forEach((corner) => {
+        let marker = L.marker(corner, {
+          draggable: true,
+          icon: L.divIcon({ className: 'handle' })
+        }).addTo(map).on('drag', createOverlayFromCorners);
+        cornerMarkers.push(marker);
+      });
+    }
+
+    document.getElementById('id_image').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        imageUrl = event.target.result;
+
+        const img = new Image();
+        img.onload = function() {
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+          const widthMeters = 2000;
+          const heightMeters = widthMeters * (imgHeight / imgWidth);
+          const centerLatLng = map.getCenter();
+          const latDiff = heightMeters / 111000;
+          const lngDiff = widthMeters / (111000 * Math.cos(centerLatLng.lat * Math.PI / 180));
+
+          const nw = L.latLng(centerLatLng.lat + latDiff / 2, centerLatLng.lng - lngDiff / 2);
+          const ne = L.latLng(centerLatLng.lat + latDiff / 2, centerLatLng.lng + lngDiff / 2);
+          const sw = L.latLng(centerLatLng.lat - latDiff / 2, centerLatLng.lng - lngDiff / 2);
+
+          createDraggableCorners(nw, ne, sw);
+          createOverlayFromCorners();
+          map.fitBounds(L.latLngBounds([nw, ne, sw]));
+        };
+        img.src = imageUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('mapForm').addEventListener('submit', function() {
+      if (cornerMarkers.length === 3) {
+        let [nw, ne, sw] = cornerMarkers.map(m => m.getLatLng());
+        document.getElementById('nw_lat').value = nw.lat;
+        document.getElementById('nw_lng').value = nw.lng;
+        document.getElementById('ne_lat').value = ne.lat;
+        document.getElementById('ne_lng').value = ne.lng;
+        document.getElementById('sw_lat').value = sw.lat;
+        document.getElementById('sw_lng').value = sw.lng;
+      }
+    });
+  </script>
+</body>
+</html>

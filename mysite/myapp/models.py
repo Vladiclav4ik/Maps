@@ -1,42 +1,32 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Profile(models.Model):
+    public_name = models.CharField(
+        max_length=150,
+        default= 'Me',
+        verbose_name="Публичное имя",
+        help_text="Имя, отображаемое другим пользователям"
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-class Training(models.Model):
-    ACTIVITY_CHOICES = [
-        ('running', 'Running'),
-        ('cycling', 'Cycling'),
-        ('swimming', 'Swimming'),
-    ]
-
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    activity_type = models.CharField(max_length=20, choices=ACTIVITY_CHOICES)
-    name = models.CharField(max_length=40, default='Training')
-    route = models.FileField(upload_to='gpx/')
-    distance = models.DecimalField(max_digits=6, decimal_places=2)  # Километраж
-    time = models.DurationField()  # Время
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])  # Оценка состояния
-
-from django.db import models
-from django.contrib.auth.models import User
 
 class MapImage(models.Model):
     PROPERTY_CHOICES = [
-        ('private', 'Личное'),
-        ('public', 'Общее'),
+        ('private', 'Личная'),
+        ('public', 'Публичная'),
     ]
 
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    property = models.CharField(
+    visibility = models.CharField(
         max_length=10,
         choices=PROPERTY_CHOICES,
-        default='private'
+        default='private',
+        verbose_name="Приватность"
     )
-    title = models.CharField(max_length=255, default='Untitled')
-    image = models.ImageField(upload_to='maps/')
+    title = models.CharField(max_length=255, default='Без названия', verbose_name="Название карты")
+    description = models.TextField( blank=True, verbose_name="Описание")
+    image = models.ImageField(upload_to='maps/', verbose_name="Файл карты")
     nw_lat = models.FloatField()  # Северо-западная широта
     nw_lng = models.FloatField()  # Северо-западная долгота
     ne_lat = models.FloatField()  # Северо-восточная широта
@@ -46,6 +36,14 @@ class MapImage(models.Model):
 
     def __str__(self):
         return f"Image Map {self.id} - {self.image.url}"
+
+    @property
+    def center_lat(self):
+        return (self.nw_lat + self.sw_lat) / 2
+
+    @property
+    def center_lng(self):
+        return (self.nw_lng + self.ne_lng) / 2
 
     class Meta:
         verbose_name = "Image Map"

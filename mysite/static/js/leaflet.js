@@ -134,4 +134,5 @@ L.ImageOverlay.Rotated = L.ImageOverlay.extend({
     }
     return this;
   }
-});
+}
+);

@@ -1,42 +1,36 @@
-from urllib import request
+from urllib.parse import urlparse
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+
 
 from .forms import LoginForm
 from .forms import UserRegistrationForm
 from django.contrib.auth.models import User
-from .models import Training, MapImage
-from .forms import TrainingForm
-from datetime import timedelta
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from .forms import MapImageForm
-from django.http import JsonResponse
-from django.core.files.base import ContentFile
+from .forms import MapImageForm, MapEditForm
 from .models import MapImage
-import base64
-from io import BytesIO
-from django.core.files.storage import default_storage
-import json
 from django.shortcuts import render, redirect
 
-@login_required
-def training_detail(request, pk):
-    training = get_object_or_404(Training, pk=pk)
-    return render(request, 'training_detail.html', {'training': training})
+
+from django.urls import reverse
 
 @login_required
 def map_view(request):
     user = User.objects.get(username=request.user.username)
     maps = MapImage.objects.filter(author=user)
-    return render(request, 'maps/map_view.html', {'maps': maps})
+    referer = request.META.get('HTTP_REFERER', reverse('map_view'))
+    return render(request, 'map_view.html', {'maps': maps, 'back_url': referer})
+
+@login_required
+def all_maps(request):
+    maps = MapImage.objects.filter(visibility="public")
+    referer = request.META.get('HTTP_REFERER', reverse('map_view'))
+    return render(request, 'all_map_view.html', {'maps': maps, 'back_url': referer})
 
 @login_required
 def upload_map(request):
+    referer = request.META.get('HTTP_REFERER', reverse('map_view'))
     if request.method == 'POST':
         form = MapImageForm(request.POST, request.FILES)
         if form.is_valid():
@@ -49,71 +43,110 @@ def upload_map(request):
             map_image.sw_lng = request.POST.get('sw_lng')
             map_image.author = request.user
             map_image.save()
-            return redirect(map_view)
+            return redirect('main')
     else:
         form = MapImageForm()
-    return render(request, 'maps/upload_map.html', {'form': form})
+    return render(request, 'upload_map.html', {
+        'form': form,
+        'back_url': referer
+    })
 
-@login_required
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from urllib.parse import urlparse
+
 def map_detail(request, map_id):
-    # Получаем карту по id
-    map_instance = get_object_or_404(MapImage, pk=map_id)
+    map_obj = get_object_or_404(MapImage, pk=map_id)
+    user = map_obj.author
+    public_name = user.profile.public_name
 
-    return render(request, 'maps/map_detail.html', {'map': map_instance})
+    referer = request.META.get('HTTP_REFERER')
+    edit_url = reverse('edit_map', args=[map_id])
 
+    # Сохраняем ссылку в сессию, если пользователь пришёл не с edit_map
+    if referer:
+        referer_path = urlparse(referer).path
+        if referer_path != edit_url:
+            request.session['from_before_edit'] = referer
+
+    # back_url для кнопки "назад"
+    back_url = request.session.get('from_before_edit', reverse('map_view'))
+
+    return render(request, 'map_detail.html', {
+        'map': map_obj,
+        'back_url': back_url,
+        'public_name': public_name,
+    })
 
 @login_required
-def add_training(request):
+def main(request):
+    referer = request.META.get('HTTP_REFERER', reverse('main'))
+    public_name = request.user.profile.public_name
+    return render(request, 'main.html', {'back_url': referer, 'public_name': public_name})
+
+@login_required
+def view_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    public_name = user.profile.public_name
+    maps = MapImage.objects.filter(author=user, visibility="public")
+    referer = request.META.get('HTTP_REFERER', reverse('map_view'))
+    context = {
+        'profile_user': user,
+        'maps': maps,
+        'back_url': referer,
+        'public_name': public_name,
+    }
+    return render(request, 'profile.html', context)
+
+@login_required
+def delete_map(request, map_id):
+    map_obj = get_object_or_404(MapImage, pk=map_id)
+
+    # Проверяем, что пользователь — автор карты
+    if map_obj.author != request.user:
+        return redirect('main')  # Или выбросить 403
+
     if request.method == 'POST':
-        form = TrainingForm(request.POST, request.FILES)
-        if form.is_valid():
-            training = form.save(commit=False)
-            training.author = request.user
-            training.save()
-            return redirect('training_list')  # Перенаправляем на страницу со списком тренировок
-    else:
-        form = TrainingForm()
-    return render(request, 'add_training.html', {'form': form})
+        map_obj.delete()
+        return redirect('main')  # Перенаправление после удаления
 
+    # При GET запросе показываем подтверждение удаления
+    return render(request, 'confirm_delete.html', {'map': map_obj})
 
 @login_required
-def training_list(request):
-    trainings = Training.objects.all()
-    return render(request, 'training_list.html', {'trainings': trainings})
+def edit_map(request, map_id):
+    map_obj = get_object_or_404(MapImage, pk=map_id)
+
+    # Проверка, что пользователь — автор карты
+    if map_obj.author != request.user:
+        return redirect('main')  # Или 403 Forbidden
+
+    if request.method == 'POST':
+        form = MapEditForm(request.POST, request.FILES, instance=map_obj)
+        if form.is_valid():
+            edited_map = form.save(commit=False)
+            # Если у карты есть координаты, обновляем их из POST, если они там есть
+            edited_map.nw_lat = request.POST.get('nw_lat', edited_map.nw_lat)
+            edited_map.nw_lng = request.POST.get('nw_lng', edited_map.nw_lng)
+            edited_map.ne_lat = request.POST.get('ne_lat', edited_map.ne_lat)
+            edited_map.ne_lng = request.POST.get('ne_lng', edited_map.ne_lng)
+            edited_map.sw_lat = request.POST.get('sw_lat', edited_map.sw_lat)
+            edited_map.sw_lng = request.POST.get('sw_lng', edited_map.sw_lng)
+
+            edited_map.save()
+            return redirect('map_detail', map_id=edited_map.id)
+    else:
+        form = MapEditForm(instance=map_obj)
+
+    return render(request, 'edit_map.html', {'form': form, 'map': map_obj})
+
 
 def redirect_to_login(request):
     return redirect('/login')
-@login_required
-def main(request):
-    user = User.objects.get(username=request.user.username)
-    trainings = Training.objects.filter(author=user)
-    total_distance = 0
-    total_time = timedelta()
-    total_rating = 0
-    num_trainings = 0
-
-    for training in trainings:
-        total_distance += training.distance
-        total_time += training.time
-        total_rating += training.rating
-        num_trainings += 1
-
-    if num_trainings > 0:
-        average_distance = total_distance
-        average_time = total_time
-        average_rating = round(total_rating / num_trainings, 2)
-    else:
-        average_distance = 0
-        average_time = 0
-        average_rating = 0
-    trainings = trainings[:1]
-    return render(request, 'main.html', {'user': user, 'trainings': trainings,
-                                            'avg_dist': average_distance, 'avg_time': average_time,
-                                            'avg_rating': average_rating})
 
 def user_login(request):
     if request.user.is_authenticated:
-        return redirect('/main')
+        return redirect('/maps')
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -136,82 +169,17 @@ def user_logout(request):
     logout(request)  # Разлогиниваем пользователя
     return redirect('/login')
 
-def mysite (request):
-    return render (request, 'O-TR.html')
 def register_view(request):
     if request.method == 'POST':
         user_form = UserRegistrationForm(request.POST)
         if user_form.is_valid():
-            new_user = user_form.save(commit=False)
-            new_user.set_password(user_form.cleaned_data['password'])
-            new_user.save()
-            authenticated_user = authenticate(username=new_user.username, password=user_form.cleaned_data['password'])
+            new_user = user_form.save()  # ✅ Вызовет form.save() с созданием Profile
+            authenticated_user = authenticate(
+                username=new_user.username,
+                password=user_form.cleaned_data['password']
+            )
             login(request, authenticated_user)
-
-            return redirect('/main')  # Перенаправление на страницу профиля
+            return redirect('/main')  # ✅ На страницу профиля или главное меню
     else:
         user_form = UserRegistrationForm()
     return render(request, 'registration/register.html', {'user_form': user_form})
-
-@login_required
-def view_profile(request, username):
-    user = User.objects.get(username=username)
-    trainings = Training.objects.filter(author=user)
-    total_distance = 0
-    total_time = timedelta()
-    total_rating = 0
-    num_trainings = 0
-
-    for training in trainings:
-        total_distance += training.distance
-        total_time += training.time
-        total_rating += training.rating
-        num_trainings += 1
-
-    if num_trainings > 0:
-        average_distance = total_distance
-        average_time = total_time
-        average_rating = round(total_rating / num_trainings, 2)
-    else:
-        average_distance = 0
-        average_time = 0
-        average_rating = 0
-    trainings = trainings[:3]
-    return render(request, 'profile.html', {'user': user, 'trainings': trainings,
-                                            'avg_dist': average_distance, 'avg_time': average_time,
-                                            'avg_rating': average_rating})
-
-
-def generate_pdf(request, training_id):
-    training = get_object_or_404(Training, id=training_id)
-
-    # Создание HttpResponse объекта с соответствующим заголовком
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="training_{training_id}.pdf"'
-
-    # Создание буфера BytesIO для PDF
-    buffer = BytesIO()
-
-    # Создание canvas объекта с помощью reportlab
-    p = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
-
-    # Заполнение PDF содержимым
-    p.drawString(100, height - 100, f'Training ID: {training.id}')
-    p.drawString(100, height - 120, f'Author: {training.author.username}')
-    p.drawString(100, height - 140, f'Activity Type: {training.get_activity_type_display()}')
-    p.drawString(100, height - 160, f'Name: {training.name}')
-    p.drawString(100, height - 180, f'Distance: {training.distance} km')
-    p.drawString(100, height - 200, f'Time: {training.time}')
-    p.drawString(100, height - 220, f'Rating: {training.rating}')
-
-    # Завершение страницы
-    p.showPage()
-    p.save()
-
-    # Перемотка буфера до начала
-    buffer.seek(0)
-
-    # Возвращение созданного PDF в HttpResponse
-    response.write(buffer.getvalue())
-    return response

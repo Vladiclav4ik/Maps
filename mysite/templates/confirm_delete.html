@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Удаление карты "{{ map.title }}"</title>
+    <style>
+      body { font-family: sans-serif; background: #f9f9f9; padding: 40px; text-align: center; }
+      .confirm-box {
+        background: white; border-radius: 12px; padding: 30px; max-width: 400px; margin: auto;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+      button {
+        background: #d9534f; color: white; border: none; padding: 12px 20px; border-radius: 8px;
+        font-size: 16px; cursor: pointer;
+      }
+      a {
+        margin-left: 20px; text-decoration: none; color: #555; font-size: 16px;
+      }
+    </style>
+</head>
+<body>
+    <div class="confirm-box">
+        <h2>Вы уверены, что хотите удалить карту?</h2>
+        <p><strong>{{ map.title }}</strong></p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Удалить</button>
+            <a href="{% url 'map_detail' map.id %}">Отмена</a>
+        </form>
+    </div>
+</body>
+</html>

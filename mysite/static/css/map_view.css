@@ -1,0 +1,103 @@
+body {
+    background: linear-gradient(135deg, #ece9e6, #ffffff);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    padding: 40px;
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-button {
+    padding: 15px 30px;
+    font-size: 1.1em;
+    color: white;
+    background: #007BFF;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.menu-button:hover {
+    background: #0056b3;
+}
+
+.logout-link {
+    display: inline-block;
+    margin-top: 30px;
+    color: #666;
+    text-decoration: none;
+}
+.logout-link:hover {
+    text-decoration: underline;
+}
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.map-card {
+    background: #f9f9f9;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.map-card:hover {
+    transform: scale(1.02);
+}
+
+.map-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    object-fit: cover;
+    max-height: 200px;
+}
+
+.map-card h2 {
+    font-size: 1.2em;
+    margin: 10px 0 5px;
+    color: #333;
+}
+
+.timestamp {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 40px;
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+

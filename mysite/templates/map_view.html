@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
   {% load static %}
-  <meta charset="UTF-8" />
-  <title>Карты пользователя {{public_name}}</title>
+  <meta charset="UTF-8">
+  <title>Мои карты</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     * {
@@ -13,57 +13,77 @@
     html, body {
       height: 100%;
       margin: 0;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh; /* Полная высота экрана */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f5f7fa;
       color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow: hidden;
     }
 
-    h1 {
+    header {
       flex: 0 0 auto;
       text-align: center;
       font-size: 32px;
       font-weight: bold;
       padding: 30px 0 10px;
       color: #222;
-      margin: 0;
     }
 
     .container {
-      flex: 1 1 auto;
+      flex: 1 1 auto;      /* Занимает всё оставшееся место между хедером и футером */
       width: 1400px;
       margin: 0 auto;
       display: flex;
       gap: 30px;
       padding: 30px;
-      height: 80%;
+      height: 80%;        /* 100% высоты контейнера body */
     }
 
-    .map-wrapper {
+    .left-panel {
       flex: 2;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid #ddd;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    #map {
-      flex: 1 1 auto;
-      width: 100%;
-      border-radius: 12px;
-      min-height: 400px;
-    }
-
-    .sidebar {
+    .right-panel {
       flex: 1;
       display: flex;
       flex-direction: column;
-      height: 100%;
+      height: 100%;        /* Чтобы дети внутри растягивались */
+    }
+
+    .map-results {
+      flex-grow: 1;
+      overflow-y: auto;    /* Вертикальный скролл, если много элементов */
+      border: 1px solid #ddd;
+      padding: 16px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .footer-buttons {
+      flex: 0 0 auto;
+      text-align: center;
+      padding: 20px;
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
+
+    #map {
+      flex-grow: 1;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      border: 1px solid #ddd;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
     }
 
     .search-box input {
@@ -72,23 +92,12 @@
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 20px;
       outline: none;
       transition: border-color 0.2s;
     }
 
     .search-box input:focus {
       border-color: #007bff;
-    }
-
-    .map-results {
-      flex-grow: 1;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 16px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     }
 
     .map-result {
@@ -121,14 +130,6 @@
       margin-top: 4px;
     }
 
-    .footer-buttons {
-      flex: 0 0 auto;
-      text-align: center;
-      padding: 30px;
-      background: #fff;
-      border-top: 1px solid #eee;
-    }
-
     .footer-buttons a {
       padding: 12px 24px;
       background: #007BFF;
@@ -145,26 +146,27 @@
   </style>
 </head>
 <body>
-  <h1>🧍 Карты пользователя {{public_name}}</h1>
+  <header>📍 Мои карты</header>
+
   <div class="container">
-    <div class="map-wrapper">
+    <div class="left-panel">
       <div id="map"></div>
     </div>
 
-    <div class="sidebar">
+    <div class="right-panel">
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Поиск по названию или описанию..." />
+        <input type="text" id="searchInput" placeholder="Поиск по названию или описанию...">
       </div>
       <div class="map-results" id="mapResults">
         {% for m in maps %}
           <div class="map-result"
-               id="result-{{ m.id }}"
-               data-id="{{ m.id }}"
-               data-title="{{ m.title|lower }}"
-               data-description="{{ m.description|default:''|lower }}"
-               data-center-lat="{{ m.center_lat }}"
-               data-center-lng="{{ m.center_lng }}">
-            <a href="{% url 'map_detail' m.id %}">{{ m.title }}</a>
+             id="result-{{ m.id }}"
+             data-id="{{ m.id }}"
+             data-title="{{ m.title|lower }}"
+             data-description="{{ m.description|default:''|lower }}"
+             data-center-lat="{{ m.center_lat }}"
+             data-center-lng="{{ m.center_lng }}">
+            <a href="{% url 'map_detail' m.id %}">{{ m.title }}</a><br>
             <small>{{ m.description }}</small>
           </div>
         {% endfor %}
@@ -178,7 +180,6 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="{% static 'js/leaflet.js' %}"></script>
-
   <script>
     const map = L.map('map').setView([59.93, 30.31], 13);
 
@@ -193,7 +194,7 @@
 
     {% for m in maps %}
       {% if m.image %}
-        (function () {
+        (function() {
           const id = "{{ m.id }}";
           const topleft = [{{ m.nw_lat }}, {{ m.nw_lng }}];
           const topright = [{{ m.ne_lat }}, {{ m.ne_lng }}];
@@ -210,7 +211,7 @@
             }
           ).addTo(map);
 
-          overlay.on('click', function (e) {
+          overlay.on('click', function(e) {
             L.popup()
               .setLatLng(e.latlng)
               .setContent('<strong>{{ m.title }}</strong><br><a href="{% url "map_detail" map_id=m.id %}">Перейти к карте</a>')
@@ -243,19 +244,23 @@
         }
       });
     });
-
     document.querySelectorAll('.map-result').forEach(result => {
       result.addEventListener('click', () => {
         const id = result.dataset.id;
         const lat = parseFloat(result.dataset.centerLat);
         const lng = parseFloat(result.dataset.centerLng);
 
+        // Добавим слой, если он неактивен
         if (overlays[id] && !map.hasLayer(overlays[id])) {
           map.addLayer(overlays[id]);
         }
 
-        map.flyTo([lat, lng], 16, { duration: 1.5 });
+        // Переместим камеру
+        map.flyTo([lat, lng], 16, {
+          duration: 1.5
+        });
 
+        // Визуальное выделение (на 1.5 секунды)
         result.style.backgroundColor = '#e6f0ff';
         setTimeout(() => {
           result.style.backgroundColor = '';

@@ -1,31 +1,171 @@
-/* CSS оранжевого цвета для формы входа */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Roboto:wght@400;500&display=swap');
+
+body {
+    background: linear-gradient(135deg, #ece9e6, #ffffff);
+    font-family: 'Montserrat', 'Segoe UI', Tahoma, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
 
 .container {
-    background-color: orange; /* Цвет контейнера */
-    padding: 20px; /* Отступы внутри контейнера */
-    border-radius: 10px; /* Скругление углов контейнера */
-    width: 0px; /* Ширина контейнера */
-    margin: 0 auto; /* Расположение по центру */
-    text-align: center; /* Выравнивание текста по центру */
+    text-align: center;
+    padding: 60px 80px;
+    max-width: 450px;
+    width: 90%;
+    background-color: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    transition: box-shadow 0.3s ease;
 }
 
-h2 {
-    color: black; /* Цвет заголовка */
+.container:hover {
+    box-shadow: 0 16px 40px rgba(0,0,0,0.18);
 }
 
-p {
-    color: black; /* Цвет текста */
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 2.8rem;
+    margin-bottom: 30px;
+    color: #222222;
+    letter-spacing: 1.2px;
+}
+
+form {
+    margin-top: 20px;
+}
+
+form p {
+    margin-bottom: 18px;
 }
 
 input[type="submit"] {
-    background-color: blue; /* Цвет кнопки */
-    color: white; /* Цвет текста на кнопке */
-    border: none; /* Убираем границу кнопки */
-    padding: 10px 20px; /* Подобрать размер отступов по вашему вкусу */
-    border-radius: 5px; /* Добавляем скругленные углы кнопке */
+    background-color: #007BFF;
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 1.2rem;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: background-color 0.35s ease, transform 0.2s ease;
+    box-shadow: 0 6px 12px rgba(0,123,255,0.4);
 }
 
 input[type="submit"]:hover {
-    background-color: darkblue; /* Цвет кнопки при наведении курсора */
+    background-color: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,86,179,0.5);
+}
+
+input[type="submit"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.6);
+}
+
+a {
+    color: #007BFF;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Добавьте в login.css или в отдельный css для регистрации */
+
+.container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px 40px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 700;
+    font-size: 28px;
+    color: #222;
+}
+
+/* Форма */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+/* Отступы и выравнивание для полей ввода */
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="submit"],
+form select,
+form textarea {
+    font-size: 16px;
+    padding: 12px 15px;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Фокус на полях */
+form input[type="text"]:focus,
+form input[type="email"]:focus,
+form input[type="password"]:focus,
+form select:focus,
+form textarea:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    outline: none;
+}
+
+/* Кнопка отправки */
+form input[type="submit"] {
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    transition: background-color 0.3s ease;
+    margin-top: 0px;
+}
+
+form input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Текст и ссылки под формой */
+.container p {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 0px;
+    color: #666;
+}
+
+.container p a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.container p a:hover {
+    color: #0056b3;
+    text-decoration: underline;
 }
 
